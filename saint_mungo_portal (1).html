@@ -1,0 +1,942 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Saint Mungo's Portal - ระบบข้อมูลระเบียบวินัยเซนต์มังโก</title>
+    <!-- Tailwind CSS CDN for high-fidelity interactive site styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&family=Sarabun:wght@400;500;600;700&family=Cinzel:wght@600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        mungoBlue: '#005088',
+                        mungoDark: '#061224',
+                        mungoGold: '#c5a059',
+                        mungoCream: '#faf8f3',
+                    },
+                    fontFamily: {
+                        sans: ['Sarabun', 'Kanit', 'sans-serif'],
+                        serif: ['Cinzel', 'serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Smooth page transition simulating Google Sites navigation */
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        /* Custom scrollbar to keep layout premium */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col">
+
+    <!-- ==================== GOOGLE SITES TOP NAVIGATION BAR ==================== -->
+    <nav class="bg-white border-b border-slate-200 sticky top-0 z-50 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                
+                <!-- Left: Site Branding (Mocking Google Sites editor header) -->
+                <div class="flex items-center space-x-3 cursor-pointer" onclick="switchTab('home')">
+                    <div class="w-10 h-10 rounded-full border border-mungoGold bg-mungoDark flex items-center justify-center overflow-hidden">
+                        <img src="image_9c2e9f.jpg" alt="Saint Logo" class="object-cover w-full h-full" onerror="this.src='https://placehold.co/100x100/061224/faf8f3?text=St.Mungo'">
+                    </div>
+                    <div>
+                        <span class="font-serif font-bold text-mungoDark text-lg tracking-wider">SAINT MUNGO</span>
+                        <span class="text-xs text-slate-400 block -mt-1">Google Sites Portal</span>
+                    </div>
+                </div>
+
+                <!-- Center: Search bar to find rules across portal -->
+                <div class="hidden md:flex flex-1 max-w-md mx-8">
+                    <div class="relative w-full">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-400">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                        </span>
+                        <input type="text" id="global-search" oninput="performSearch()" placeholder="ค้นหากฎ คาถา ค่าปรับ แทรก..." class="w-full pl-10 pr-4 py-1.5 bg-slate-100 hover:bg-slate-200 focus:bg-white border border-transparent focus:border-mungoBlue rounded-lg text-sm focus:outline-none transition-colors">
+                    </div>
+                </div>
+
+                <!-- Right: Nav Menu Links (Simulating Google Sites Page Navigator) -->
+                <div class="hidden lg:flex items-center space-x-1 text-xs font-medium">
+                    <button onclick="switchTab('home')" class="nav-tab px-3 py-2 rounded-md text-mungoBlue bg-slate-100" id="tab-home-btn">หน้าแรก</button>
+                    <button onclick="switchTab('duty')" class="nav-tab px-3 py-2 rounded-md text-slate-600 hover:text-mungoBlue hover:bg-slate-50" id="tab-duty-btn">การเข้าเวร</button>
+                    <button onclick="switchTab('grounds')" class="nav-tab px-3 py-2 rounded-md text-slate-600 hover:text-mungoBlue hover:bg-slate-50" id="tab-grounds-btn">กฎพื้นที่</button>
+                    <button onclick="switchTab('safety')" class="nav-tab px-3 py-2 rounded-md text-slate-600 hover:text-mungoBlue hover:bg-slate-50" id="tab-safety-btn">ความปลอดภัย</button>
+                    <button onclick="switchTab('treatment')" class="nav-tab px-3 py-2 rounded-md text-slate-600 hover:text-mungoBlue hover:bg-slate-50" id="tab-treatment-btn">กฎการรักษา</button>
+                    <button onclick="switchTab('story')" class="nav-tab px-3 py-2 rounded-md text-slate-600 hover:text-mungoBlue hover:bg-slate-50" id="tab-story-btn">สตอรี่</button>
+                    <button onclick="switchTab('rates')" class="nav-tab px-3 py-2 rounded-md text-slate-600 hover:text-mungoBlue hover:bg-slate-50" id="tab-rates-btn">ค่ารักษา & จ้างงาน</button>
+                </div>
+
+                <!-- Mobile Menu Button -->
+                <div class="lg:hidden">
+                    <button onclick="toggleMobileMenu()" class="text-slate-600 p-2 focus:outline-none">
+                        <i class="fa-solid fa-bars text-xl"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Dropdown Menu -->
+        <div id="mobile-menu" class="hidden lg:hidden border-t border-slate-100 bg-white px-4 py-2 space-y-1">
+            <button onclick="switchTab('home')" class="w-full text-left px-3 py-2 rounded-md block text-mungoBlue font-medium">หน้าแรก</button>
+            <button onclick="switchTab('duty')" class="w-full text-left px-3 py-2 rounded-md block text-slate-600">การเข้าเวร (Healer/Intern)</button>
+            <button onclick="switchTab('grounds')" class="w-full text-left px-3 py-2 rounded-md block text-slate-600">กฎระเบียบพื้นที่เซนต์มังโก</button>
+            <button onclick="switchTab('safety')" class="w-full text-left px-3 py-2 rounded-md block text-slate-600">ความปลอดภัยและบทลงโทษ</button>
+            <button onclick="switchTab('treatment')" class="w-full text-left px-3 py-2 rounded-md block text-slate-600">กฎบำบัดรักษาพื้นฐาน</button>
+            <button onclick="switchTab('story')" class="w-full text-left px-3 py-2 rounded-md block text-slate-600">แนวปฏิบัติการเล่นสตอรี่</button>
+            <button onclick="switchTab('rates')" class="w-full text-left px-3 py-2 rounded-md block text-slate-600">อัตราค่าบริการและการว่าจ้าง</button>
+        </div>
+    </nav>
+
+    <!-- ==================== HERO HEADER ==================== -->
+    <header class="relative bg-gradient-to-r from-mungoDark to-slate-900 py-16 px-4 text-center border-b-4 border-mungoGold overflow-hidden">
+        <div class="absolute inset-0 bg-[radial-gradient(#c5a059_1px,transparent_1px)] [background-size:16px_16px] opacity-10"></div>
+        <div class="relative max-w-4xl mx-auto flex flex-col items-center">
+            
+            <div class="w-44 h-44 rounded-full border-4 border-mungoGold overflow-hidden bg-mungoDark shadow-2xl mb-4 transform hover:scale-105 transition-transform duration-300">
+                <img src="image_9c2e9f.jpg" alt="Saint Mungo Crest" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/200x200/061224/faf8f3?text=SAINT+MUNGO'">
+            </div>
+
+            <h1 class="text-white text-5xl font-serif font-extrabold tracking-widest mb-1">saint</h1>
+            <div class="w-24 h-1 bg-mungoGold mx-auto rounded mb-4"></div>
+            
+            <p class="text-mungoGold font-medium text-lg tracking-wider">SAINT MUNGO'S PORTAL</p>
+            <p class="text-slate-300 text-sm max-w-xl mt-2 leading-relaxed font-light">
+                ระบบจัดการสิทธิ์ คู่มือกฎระเบียบเซนต์มังโก และระเบียบวินัยการทำงานของเซนต์มังโก วิทยาลัยอาคาเดีย ควบคุมโดยกระทรวงเวทมนตร์
+            </p>
+        </div>
+    </header>
+
+    <!-- ==================== TOAST ALERT NOTIFICATION MODAL ==================== -->
+    <div id="toast-notification" class="fixed bottom-5 right-5 z-50 translate-y-20 opacity-0 pointer-events-none transition-all duration-300">
+        <div class="bg-slate-900 border-l-4 border-mungoGold text-white px-5 py-3 rounded-lg shadow-2xl flex items-center gap-3">
+            <span id="toast-icon" class="text-mungoGold"><i class="fa-solid fa-circle-check"></i></span>
+            <span id="toast-message" class="text-xs font-medium">คัดลอกข้อมูลสำเร็จ!</span>
+        </div>
+    </div>
+
+    <!-- ==================== MAIN CONTAINER LAYOUT ==================== -->
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        
+        <!-- ==================== SEARCH RESULTS SECTION (DYNAMIC) ==================== -->
+        <div id="search-results-section" class="hidden mb-8 bg-amber-50 border border-amber-200 p-6 rounded-xl">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-amber-800 font-semibold flex items-center gap-2">
+                    <i class="fa-solid fa-circle-info"></i> ผลลัพธ์การค้นหาสำหรับ "<span id="search-query-text"></span>"
+                </h3>
+                <button onclick="clearSearch()" class="text-sm text-slate-500 hover:text-slate-800 underline">ล้างคำค้นหา</button>
+            </div>
+            <div id="search-results-container" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Javascript will inject search result cards here -->
+            </div>
+        </div>
+
+        <!-- ==================== TAB 1: HOME (PORTAL DIRECTORY) ==================== -->
+        <div id="tab-home" class="tab-content active space-y-8">
+            
+            <!-- Quick Dashboard Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Welcome Card -->
+                <div class="md:col-span-2 bg-white p-8 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
+                    <div>
+                        <span class="bg-indigo-100 text-indigo-800 px-3 py-1 rounded-full text-xs font-semibold mb-3 inline-block">ประกาศอัปเดตระเบียบสภากระทรวง</span>
+                        <h2 class="text-2xl font-bold text-mungoDark mb-3">ยินดีต้อนรับสู่ศูนย์กลางข้อมูลเซนต์มังโกอาคาเดีย</h2>
+                        <p class="text-slate-600 leading-relaxed mb-4 text-sm">
+                            ไซต์พอร์ทัลนี้ได้รับการอัปเดตกฎระเบียบการเข้าเวรปฏิบัติหน้าที่ จรรยาบรรณ และบทลงโทษอย่างเป็นทางการ (ข้อตกลงและระเบียบควบคุมโดย Milaz Richez) เพื่อให้เจ้าหน้าที่และคนทั่วไปใช้ตรวจสอบความถูกต้องร่วมกันได้อย่างรวดเร็ว
+                        </p>
+                    </div>
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-4 border-t border-slate-100 text-center">
+                        <div class="p-3 bg-slate-50 rounded-xl">
+                            <span class="block text-xl font-bold text-mungoBlue">950</span>
+                            <span class="text-[11px] text-slate-500 uppercase">วิทยุสื่อสารหลัก</span>
+                        </div>
+                        <div class="p-3 bg-slate-50 rounded-xl">
+                            <span class="block text-xl font-bold text-mungoBlue">21 ชม.</span>
+                            <span class="text-[11px] text-slate-500 uppercase">ขั้นต่ำHealer/สัปดาห์</span>
+                        </div>
+                        <div class="p-3 bg-slate-50 rounded-xl">
+                            <span class="block text-xl font-bold text-mungoBlue">3 ชม.</span>
+                            <span class="text-[11px] text-slate-500 uppercase">ขั้นต่ำIntern/วัน</span>
+                        </div>
+                        <div class="p-3 bg-slate-50 rounded-xl">
+                            <span class="block text-xl font-bold text-mungoBlue">10 เท่า</span>
+                            <span class="text-[11px] text-slate-500 uppercase">โทษปรับเมื่อใส่บิลเกิน</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Calculator Quick Widget -->
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
+                    <div>
+                        <h3 class="text-lg font-bold text-mungoDark flex items-center gap-2 mb-3">
+                            <i class="fa-solid fa-calculator text-mungoGold"></i> ส่วนแบ่งค่าจ้าง Healer & Intern
+                        </h3>
+                        <p class="text-xs text-slate-500 mb-4 leading-relaxed">
+                            กรณีรับงานว่าจ้างภายนอกร่วมกัน ให้แบ่งรายได้เท่ากันครึ่งต่อครึ่ง (50:50) คำนวณได้ทันทีที่นี่
+                        </p>
+                        
+                        <div class="space-y-3 mb-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">ยอดค่าว่าจ้างทั้งหมด (Sickle):</label>
+                                <input type="number" id="calc-input" value="30000" oninput="calculateShare()" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-mungoBlue">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="p-4 bg-mungoCream rounded-xl border border-mungoGold/30">
+                        <div class="flex justify-between text-xs text-slate-600 mb-2 pb-2 border-b border-mungoGold/20">
+                            <span>ส่วนแบ่ง Healer (50%)</span>
+                            <span class="font-bold text-mungoDark" id="healer-share-result">15,000 SK</span>
+                        </div>
+                        <div class="flex justify-between text-xs text-emerald-800">
+                            <span>ส่วนแบ่ง Intern (50%)</span>
+                            <span class="font-bold text-emerald-600" id="intern-share-result">15,000 SK</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation Directory Cards (Inspired by Google Sites Link blocks) -->
+            <div>
+                <h3 class="text-lg font-bold text-mungoDark mb-4 flex items-center gap-2">
+                    <i class="fa-solid fa-folder-open text-mungoGold"></i> สารบัญส่วนจัดการของ Google Sites
+                </h3>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    
+                    <div onclick="switchTab('duty')" class="p-5 bg-white hover:bg-slate-50 border border-slate-200 hover:border-mungoBlue rounded-xl cursor-pointer shadow-sm transition-all group">
+                        <div class="w-10 h-10 rounded-lg bg-indigo-50 flex items-center justify-center text-mungoBlue mb-4 group-hover:scale-110 transition-transform">
+                            <i class="fa-solid fa-user-doctor text-lg"></i>
+                        </div>
+                        <h4 class="font-bold text-mungoDark mb-1 text-sm">การเข้าเวรปฏิบัติหน้าที่</h4>
+                        <p class="text-xs text-slate-500 leading-relaxed">กฎเหล็กHealer 21ชั่วโมง/สัปดาห์ และระเบียบฝึกงานของ Intern</p>
+                    </div>
+
+                    <div onclick="switchTab('grounds')" class="p-5 bg-white hover:bg-slate-50 border border-slate-200 hover:border-mungoBlue rounded-xl cursor-pointer shadow-sm transition-all group">
+                        <div class="w-10 h-10 rounded-lg bg-emerald-50 flex items-center justify-center text-emerald-600 mb-4 group-hover:scale-110 transition-transform">
+                            <i class="fa-solid fa-building-user text-lg"></i>
+                        </div>
+                        <h4 class="font-bold text-mungoDark mb-1 text-sm">กฎระเบียบพื้นที่หน่วยงาน</h4>
+                        <p class="text-xs text-slate-500 leading-relaxed">กฎการใช้เสียง การหักคะแนนบ้านนักเรียน และโทษวินัยไม้กวาด</p>
+                    </div>
+
+                    <div onclick="switchTab('treatment')" class="p-5 bg-white hover:bg-slate-50 border border-slate-200 hover:border-mungoBlue rounded-xl cursor-pointer shadow-sm transition-all group">
+                        <div class="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center text-mungoBlue mb-4 group-hover:scale-110 transition-transform">
+                            <i class="fa-solid fa-stethoscope text-lg"></i>
+                        </div>
+                        <h4 class="font-bold text-mungoDark mb-1 text-sm">กฎการบำบัดรักษาพื้นฐาน</h4>
+                        <p class="text-xs text-slate-500 leading-relaxed">กฎ 13 ข้อ คาถาเวทมนตร์ ข้อห้าม และโทษปรับ 10 เท่าหากใส่บิลเกิน</p>
+                    </div>
+
+                    <div onclick="switchTab('rates')" class="p-5 bg-white hover:bg-slate-50 border border-slate-200 hover:border-mungoBlue rounded-xl cursor-pointer shadow-sm transition-all group">
+                        <div class="w-10 h-10 rounded-lg bg-amber-50 flex items-center justify-center text-amber-600 mb-4 group-hover:scale-110 transition-transform">
+                            <i class="fa-solid fa-coins text-lg"></i>
+                        </div>
+                        <h4 class="font-bold text-mungoDark mb-1 text-sm">อัตราค่าบริการคาถา</h4>
+                        <p class="text-xs text-slate-500 leading-relaxed">ราคากลางคาถาชุบชีวิต การรักษาป่าต้องห้าม และสัญญารายชั่วโมง</p>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== TAB 2: DUTY (HEALER & INTERN RULES) ==================== -->
+        <div id="tab-duty" class="tab-content space-y-8">
+            <div class="border-b border-slate-200 pb-4">
+                <h2 class="text-3xl font-bold text-mungoDark flex items-center gap-3">
+                    <i class="fa-solid fa-clock-rotate-left text-mungoBlue"></i> หมวดการปฏิบัติงานและการเข้าเวร
+                </h2>
+                <p class="text-slate-500 text-sm mt-1">ข้อตกลงและหลักปฏิบัติทั่วไปที่ผู้บำบัด (Healers) และเด็กฝึกงาน (Interns) ต้องยึดมั่นอย่างเคร่งครัด</p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <!-- Healer Section -->
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                    <div class="flex items-center gap-3 border-b border-slate-100 pb-3">
+                        <div class="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-mungoBlue"><i class="fa-solid fa-user-doctor text-xl"></i></div>
+                        <div>
+                            <h3 class="font-bold text-mungoDark text-lg">การเข้าเวรของผู้บำบัด (Healers)</h3>
+                            <span class="text-xs text-mungoBlue font-semibold">ขั้นต่ำ 21 ชั่วโมงต่อสัปดาห์</span>
+                        </div>
+                    </div>
+                    
+                    <ul class="space-y-3 text-sm text-slate-600">
+                        <li class="flex items-start gap-3 p-2 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors">
+                            <i class="fa-solid fa-circle-check text-emerald-500 mt-1"></i>
+                            <div><strong>ประจำสถานที่ที่กำหนด:</strong> ต้องปฏิบัติหน้าที่เฉพาะบริเวณที่กำหนด เช่น จัตุรัสกลาง หรือโซนรักษาพื้นสตอรี่ เพื่อพร้อมวิ่งบำบัด</div>
+                        </li>
+                        <li class="flex items-start gap-3 p-2 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors">
+                            <i class="fa-solid fa-circle-check text-emerald-500 mt-1"></i>
+                            <div><strong>ระเบียบเครื่องแบบ:</strong> ต้องสวมใส่เครื่องแบบเซนต์มังโกตลอดเวลาทำงาน (ที่ได้สิทธิ์ใช้จากเหรียญหน่วยงาน)</div>
+                        </li>
+                        <li class="flex items-start gap-3 p-2 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors">
+                            <i class="fa-solid fa-circle-check text-emerald-500 mt-1"></i>
+                            <div><strong>เชื่อมต่อวิทยุเสมอ:</strong> ต้องเข้าหินสื่อสารช่อง 950 ทุกครั้ง หากเข้าเวรแต่จงใจเลี่ยงไม่เข้าระบบจะถูกปรับ <span class="bg-rose-100 text-rose-800 font-bold px-1.5 py-0.5 rounded text-xs">30,000 SK</span></div>
+                        </li>
+                        <li class="flex items-start gap-3 p-2 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors">
+                            <i class="fa-solid fa-circle-check text-emerald-500 mt-1"></i>
+                            <div><strong>การพักผ่อน (AFK):</strong> ห้ามปล่อยตัว AFK นานเกิน 15 นาที และต้องใช้วิทยุสื่อสารแจ้งแพทย์ท่านอื่นร่วมเวรก่อนเสมอ</div>
+                        </li>
+                        <li class="flex items-start gap-3 p-2 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors">
+                            <i class="fa-solid fa-ban text-rose-500 mt-1"></i>
+                            <div><strong>ห้ามฟาร์มเด็ดขาด:</strong> ไม่อนุญาตให้ทำการฟาร์มมอนสเตอร์ หรือเก็บสมุนไพร/ทรัพยากรทุกกรณีขณะสวมเครื่องแบบหรือเข้าเวร</div>
+                        </li>
+                        <li class="flex items-start gap-3 p-2 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors">
+                            <i class="fa-solid fa-circle-check text-emerald-500 mt-1"></i>
+                            <div><strong>ระเบียบลางาน:</strong> ลงบันทึกผ่านนิตยสารห้องลางานให้ชัดเจน และจำกัดลางานไม่เกิน 3 วันต่อสัปดาห์ (กรณีจำเป็นเร่งด่วนแจ้งหัวหน้างานโดยตรง)</div>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Intern Section -->
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                    <div class="flex items-center gap-3 border-b border-slate-100 pb-3">
+                        <div class="w-10 h-10 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-600"><i class="fa-solid fa-graduation-cap text-xl"></i></div>
+                        <div>
+                            <h3 class="font-bold text-mungoDark text-lg">การเข้าเวรของเด็กฝึกงาน (Interns)</h3>
+                            <span class="text-xs text-emerald-600 font-semibold">สะสมชั่วโมงและปฏิบัติตามคำสั่ง Healer อย่างจริงจัง</span>
+                        </div>
+                    </div>
+                    
+                    <ul class="space-y-3 text-sm text-slate-600">
+                        <li class="flex items-start gap-3 p-2 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors">
+                            <i class="fa-solid fa-circle-check text-emerald-500 mt-1"></i>
+                            <div><strong>ชั่วโมงและเคสบำบัด:</strong> ปฏิบัติหน้าที่ไม่ต่ำกว่า 3 ชม./วัน หรือ 40 ชม./ปีการศึกษา และสะสมผลงานชุบชีวิตให้ได้ 60 เคส (เริ่มสัญญารับหินชุบแจกฟรี 10 ชิ้น)</div>
+                        </li>
+                        <li class="flex items-start gap-3 p-2 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors">
+                            <i class="fa-solid fa-circle-check text-emerald-500 mt-1"></i>
+                            <div><strong>การแต่งกาย:</strong> ต้องสวมชุดเครื่องแบบแพทย์ฝึกหัดเซนต์มังโกเฉพาะ ตลอดระยะเวลาที่ลงเวร</div>
+                        </li>
+                        <li class="flex items-start gap-3 p-2 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors">
+                            <i class="fa-solid fa-circle-check text-emerald-500 mt-1"></i>
+                            <div><strong>ช่องทางวิทยุสื่อสาร:</strong> ต้องแสตนด์บายในช่องสื่อสาร 950 ฝ่าฝืนไม่เข้าหินสื่อสารระหว่างลงเวรปรับ <span class="bg-rose-100 text-rose-800 font-bold px-1.5 py-0.5 rounded text-xs">10,000 SK</span></div>
+                        </li>
+                        <li class="flex items-start gap-3 p-2 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors">
+                            <i class="fa-solid fa-ban text-rose-500 mt-1"></i>
+                            <div><strong>ห้ามฟาร์มทรัพยากร:</strong> ห้ามล่ามอนสเตอร์หรือฟาร์มเก็บวัตถุดิบต่างๆ ขณะสวมชุดปฏิบัติหน้าที่เช่นเดียวกัน</div>
+                        </li>
+                        <li class="flex items-start gap-3 p-2 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors">
+                            <i class="fa-solid fa-circle-check text-emerald-500 mt-1"></i>
+                            <div><strong>กฎทีมเวิร์คและวงรับเคส:</strong> ในการเข้าวงเพื่อรับเคสรักษาที่มีความเสี่ยงสูง ต้องมีจำนวนผู้บำบัด (Healers) และผู้ช่วย (Interns) รวมกันอย่างน้อย **3 คนขึ้นไป** เสมอ หากทีมไม่ครบห้ามเข้าไปทำเคสรักษาเด็ดขาด</div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== TAB 3: GROUNDS (HOSPITAL SITE RULES) ==================== -->
+        <div id="tab-grounds" class="tab-content space-y-8">
+            <div class="border-b border-slate-200 pb-4">
+                <h2 class="text-3xl font-bold text-mungoDark flex items-center gap-3">
+                    <i class="fa-solid fa-building-user text-mungoBlue"></i> กฎระเบียบพื้นที่หน่วยงานจัตุรัสกลาง
+                </h2>
+                <p class="text-slate-500 text-sm mt-1">โปรดปฏิบัติตามอย่างเคร่งครัดเพื่อความเป็นระเบียบและสวัสดิภาพของทุกคนที่เข้ามาใช้บริการ</p>
+            </div>
+
+            <!-- Interactive Fine lookup widget -->
+            <div class="bg-white border border-slate-200 shadow-sm p-6 rounded-2xl grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+                <div class="space-y-2">
+                    <h3 class="font-bold text-mungoDark text-lg flex items-center gap-2">
+                        <i class="fa-solid fa-scale-balanced text-mungoGold"></i> เครื่องคำนวณบทลงโทษและค่าปรับจำลอง
+                    </h3>
+                    <p class="text-xs text-slate-500 leading-relaxed">
+                        ระบบคำนวณและคาดการณ์โทษปรับกรณีร่ายเวทมนตร์ พกอาวุธ หรือสัญจรด้วยยานพาหนะ/ไม้กวาดเข้ามายังพิกัดจัตุรัสเซนต์มังโก
+                    </p>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">เลือกประเภทพฤติกรรมที่ฝ่าฝืน:</label>
+                        <select id="fine-type" onchange="lookupFine()" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-mungoBlue">
+                            <option value="broom-student">ฝ่าฝืนขี่ไม้กวาด/ยานพาหนะเข้าพื้นที่ (นักศึกษา)</option>
+                            <option value="broom-citizen">ฝ่าฝืนขี่ไม้กวาด/ยานพาหนะเข้าพื้นที่ (ประชาชน/โรลพิเศษ)</option>
+                            <option value="wand-first">ร่ายเวทมนตร์/พกไม้กายสิทธิ์ครั้งที่ 1 (เตือน + หักคะแนน)</option>
+                            <option value="wand-second">ร่ายเวทมนตร์/พกไม้กายสิทธิ์ครั้งที่ 2</option>
+                            <option value="wand-third">ร่ายเวทมนตร์/พกไม้กายสิทธิ์ครั้งที่ 3</option>
+                            <option value="wand-multi">ร่ายเวทมนตร์/พกไม้กายสิทธิ์ครั้งที่ 4 เป็นต้นไป</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="bg-mungoCream border border-mungoGold/30 p-5 rounded-xl space-y-3">
+                    <div class="flex justify-between text-xs pb-2 border-b border-mungoGold/20">
+                        <span class="text-slate-600">ค่าปรับทางการเงิน (Sickle)</span>
+                        <span class="font-bold text-mungoDark" id="fine-sickle-val">50,000 Sickle</span>
+                    </div>
+                    <div class="flex justify-between text-xs pb-2 border-b border-mungoGold/20">
+                        <span class="text-slate-600">การหักคะแนนบ้านพักนักเรียน</span>
+                        <span class="font-bold text-rose-600" id="fine-points-val">หักคะแนนบ้าน 10 คะแนน</span>
+                    </div>
+                    <div class="text-[11px] text-slate-400 font-light italic" id="fine-action-val">
+                        *ระบบจะประสานส่งเรื่องเรียกหัวหน้าบ้านพักเข้ามาตรวจสอบพฤติกรรมทันทีโดยไม่มีการยกเว้น
+                    </div>
+                </div>
+            </div>
+
+            <!-- Standard Grounds Rules Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Silence -->
+                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between">
+                    <div>
+                        <div class="w-10 h-10 rounded-lg bg-indigo-50 text-mungoBlue flex items-center justify-center text-lg mb-3"><i class="fa-solid fa-volume-xmark"></i></div>
+                        <h4 class="font-bold text-mungoDark mb-2 text-sm">1. ควบคุมระดับเสียงรบกวน</h4>
+                        <p class="text-xs text-slate-600 leading-relaxed">หลีกเลี่ยงการกระทำอันส่งผลต่อความเงียบสงบในพื้นที่ทำงานแพทย์และจุดปฐมพยาบาล เช่น การเปิดวงไมค์ตะโกนดังผิดปกติ</p>
+                    </div>
+                    <span class="text-[11px] text-slate-400 mt-4 block">*หากส่งเสียงรบกวนเด่นชัดจะถูกตักเตือนทันที</span>
+                </div>
+
+                <!-- No masks -->
+                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between">
+                    <div>
+                        <div class="w-10 h-10 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center text-lg mb-3"><i class="fa-solid fa-mask"></i></div>
+                        <h4 class="font-bold text-mungoDark mb-2 text-sm">2. ห้ามปกปิดใบหน้า / สวมหน้ากาก</h4>
+                        <p class="text-xs text-slate-600 leading-relaxed">ไม่อนุญาตให้สวมหน้ากากหรือสวมเครื่องปกปิดใบหน้าเข้ามายังพื้นที่จัตุรัสและบริเวณเซนต์มังโกเด็ดขาด คนไข้ต้องถอดหน้ากากออกก่อนทำเคสรักษาพยาบาล</p>
+                    </div>
+                    <span class="text-[11px] text-slate-400 mt-4 block">*สงวนสิทธิ์การรักษากลุ่มผู้ไม่ยอมเผยโฉมหน้า</span>
+                </div>
+
+                <!-- Wand regulation -->
+                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between">
+                    <div>
+                        <div class="w-10 h-10 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center text-lg mb-3"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
+                        <h4 class="font-bold text-mungoDark mb-2 text-sm">3. การเก็บพกและข้อห้ามร่ายเวท</h4>
+                        <p class="text-xs text-slate-600 leading-relaxed">เมื่อเหยียบเข้าเขตจัตุรัสเซนต์มังโก จะต้องเก็บไม้กายสิทธิ์และห้ามนำมาโบกสะบัดหรือร่ายมนตร์ทำเคสใดๆ โดยพละการ หากเตือนแล้วไม่ฟังจะนำตัวส่งมหาวิทยาลัยทันที</p>
+                    </div>
+                    <span class="text-[11px] text-slate-400 mt-4 block">*การทำผิดซ้ำครั้งแรกหักคะแนนบ้าน จนถึงขั้นปรับ 100,000 SK</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== TAB 4: SAFETY (PROTECTION & PUNISHMENTS) ==================== -->
+        <div id="tab-safety" class="tab-content space-y-8">
+            <div class="border-b border-slate-200 pb-4">
+                <h2 class="text-3xl font-bold text-mungoDark flex items-center gap-3">
+                    <i class="fa-solid fa-shield-halved text-mungoBlue"></i> ความปลอดภัย จรรยาบรรณ และบทลงโทษ
+                </h2>
+                <p class="text-slate-500 text-sm mt-1">มาตรการคุ้มครองเจ้าหน้าที่พยาบาล และระเบียบบังคับประพฤติจรรยาบรรณแพทย์สูงสุด</p>
+            </div>
+
+            <!-- Two Column Layout: Content with Official Document Image -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                
+                <!-- Left Details Info -->
+                <div class="lg:col-span-7 space-y-6">
+                    
+                    <!-- Section 1: Healer Protections -->
+                    <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                        <h3 class="font-bold text-mungoDark text-lg border-b border-slate-100 pb-3 flex items-center gap-2">
+                            <i class="fa-solid fa-user-shield text-emerald-600"></i> สิทธิ์และการคุ้มครองผู้บำบัดรักษา (Healer Protection)
+                        </h3>
+                        <ul class="space-y-3 text-sm text-slate-600">
+                            <li class="flex gap-3">
+                                <span class="text-mungoGold font-bold">•</span>
+                                <div><strong>ห้ามทำร้ายผู้ปฏิบัติงาน:</strong> ห้ามมีผู้ใดทำร้ายผู้บำบัดรักษาในเครื่องแบบเด็ดขาด ทั้งการร่ายเวทย์หรือเจตนาชกต่อย ฝ่าฝืนปรับ <span class="bg-rose-100 text-rose-800 font-bold px-1.5 py-0.5 rounded text-xs">100,000 SK</span> (ครั้งแรกจะมีการตักเตือนและจดชื่อสะสม หากมีครั้งต่อไปปรับตามจำนวนที่กำหนดจริง)</div>
+                            </li>
+                            <li class="flex gap-3">
+                                <span class="text-mungoGold font-bold">•</span>
+                                <div><strong>สิทธิ์ควบคุมเคลื่อนย้าย:</strong> ระหว่างคนไข้ขัดขืนการลงโทษ เจ้าหน้าที่สามารถอุ้มย้ายได้โดยไม่ต้องร้องขอ และลงบันทึกใบสั่งเรียกเก็บเงินทางระบบใส่บิลได้เลย</div>
+                            </li>
+                            <li class="flex gap-3">
+                                <span class="text-mungoGold font-bold">•</span>
+                                <div><strong>การสะกดระงับเหตุ:</strong> หากเกิดการทำร้ายสู้กันขึ้นมา แพทย์ที่มีเวทมนตร์คาถา <em>Immobulus</em> สามารถใช้ล็อคตัวคนไข้หรือผู้ก่อความไม่สงบเพื่อระงับเหตุตามขั้นตอนได้</div>
+                            </li>
+                            <li class="flex gap-3">
+                                <span class="text-mungoGold font-bold">•</span>
+                                <div><strong>การขึ้นระบบขึ้นบัญชีดำ (Blacklist):</strong> หากคนไข้พยายามหลบหนี เจ้าหน้าที่สามารถสเก็ตช์ภาพร่างใบหน้าหรือจดบันทึกประวัติเพื่อทำ Blacklist (ประวัติแบล็คลิสต์จะติดตัวจนกว่าผู้กระทำผิดจะเข้าชำระค่าปรับครบถ้วน)</div>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- Section 2: Conduct Control -->
+                    <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                        <h3 class="font-bold text-mungoDark text-lg border-b border-slate-100 pb-3 flex items-center gap-2">
+                            <i class="fa-solid fa-scale-balanced text-rose-600"></i> การควบคุมความประพฤติและทัณฑ์บนผู้บำบัด
+                        </h3>
+                        <ul class="space-y-3 text-sm text-slate-600">
+                            <li class="flex gap-3">
+                                <span class="text-rose-500 font-bold">•</span>
+                                <div><strong>ห้ามก่อเรื่องวิวาท:</strong> ห้ามแพทย์มีเรื่องทะเลาะวิวาทเดือดร้อนกับนักศึกษา อาจารย์ หรือประชาชนส่งผลต่อภาพลักษณ์ ฝ่าฝืนครั้งแรกตักเตือนและปรับ <span class="bg-rose-100 text-rose-800 font-bold px-1 rounded text-xs">200,000 SK</span> และคาดทัณฑ์บน หากพบเห็นมีครั้งต่อไป จะปลดออกจากการเป็นแพทย์เซนต์มังโกทันที และปรับเงิน <span class="bg-rose-100 text-rose-800 font-bold px-1 rounded text-xs">500,000 SK</span> (ยกเว้นป้องกันตัวขณะเกิดเนื้อเรื่องสตอรี่)</div>
+                            </li>
+                            <li class="flex gap-3">
+                                <span class="text-rose-500 font-bold">•</span>
+                                <div><strong>ระบบคาดทัณฑ์บน:</strong> หากได้รับการแจ้งร้องเรียนพฤติกรรมและพบข้อเท็จจริง จะคาดโทษสะสมครบ 3 ครั้ง (นับรวมข้อก่อเรื่องด้านบน) จะปลดพ้นสภาพเจ้าหน้าที่แพทย์ และยึดคืนคาถาเซนต์มังโกทั้งหมดทันที</div>
+                            </li>
+                        </ul>
+                    </div>
+
+                </div>
+
+                <!-- Right Picture Column - Reference to image_9c2e5f.jpg -->
+                <div class="lg:col-span-5 flex flex-col justify-start">
+                    <div class="bg-white border border-slate-200 shadow-sm rounded-2xl p-4 overflow-hidden">
+                        <div class="text-center pb-3 border-b border-slate-100 mb-4">
+                            <h4 class="font-serif font-bold text-mungoDark text-sm">Official Punishment Table</h4>
+                            <p class="text-[11px] text-slate-400">ลงนามรับรองระบบบทลงโทษอย่างเป็นทางการ โดย Milaz Richez</p>
+                        </div>
+                        <div class="rounded-xl border border-slate-200 overflow-hidden bg-mungoCream">
+                            <!-- Image reference to image_9c2e5f.jpg -->
+                            <img src="image_9c2e5f.jpg" alt="Official Punishment Chart Signed by Milaz Richez" class="w-full h-auto object-cover hover:scale-105 transition-transform duration-300" onerror="this.src='https://placehold.co/400x600/faf8f3/061224?text=Punishment+Chart'">
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ==================== TAB 5: TREATMENT (BASIC TREATMENT RULES) ==================== -->
+        <div id="tab-treatment" class="tab-content space-y-8">
+            <div class="border-b border-slate-200 pb-4">
+                <h2 class="text-3xl font-bold text-mungoDark flex items-center gap-3">
+                    <i class="fa-solid fa-prescription text-mungoBlue"></i> กฎการบำบัดรักษาพยาบาลและการใช้เวทมนตร์พื้นฐาน
+                </h2>
+                <p class="text-slate-500 text-sm mt-1">ข้อกำหนดสำคัญ 13 ประการ เพื่อคงจรรยาบรรณวิชาชีพและกฎระเบียบรักษาความปลอดภัยของหน่วยงานเซนต์มังโก</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm text-slate-600 leading-relaxed">
+                <div class="p-6 bg-white border border-slate-200 rounded-2xl shadow-sm space-y-4">
+                    <h3 class="font-bold text-mungoDark text-md border-b border-slate-100 pb-2 flex items-center gap-2">
+                        <i class="fa-solid fa-circle-info text-mungoBlue"></i> ข้อปฏิบัติด้านจรรยาบรรณและสัญจร
+                    </h3>
+                    <ul class="space-y-2.5">
+                        <li class="flex items-start gap-2.5">
+                            <span class="text-mungoGold font-bold">1.</span>
+                            <div><strong>ไม่เลือกปฏิบัติในการรักษา:</strong> ต้องบำบัดดูแลทุกคนอย่างเท่าเทียมและดีที่สุดในกรณีที่ผู้ป่วยอยู่ในเครื่องแบบปกติ (นักศึกษา, ศาสตราจารย์, ประชาชน, ภาคี)</div>
+                        </li>
+                        <li class="flex items-start gap-2.5">
+                            <span class="text-mungoGold font-bold">2.</span>
+                            <div><strong>เขตฟาร์มมอนสเตอร์:</strong> ห้ามทำการร่ายเวทมนตร์บำบัดฟื้นฟูรักษาผู้อื่นในจุดฟาร์มมอนสเตอร์โดยเด็ดขาดในทุกๆ กรณี</div>
+                        </li>
+                        <li class="flex items-start gap-2.5">
+                            <span class="text-mungoGold font-bold">3.</span>
+                            <div><strong>การได้รับคำขอสิทธิ์:</strong> ห้ามเข้าทำการร่ายเวทย์บำบัดใส่ร่างกายคนไข้โดยพละการ โดยที่ตัวคนไข้ยังไม่ได้รับการแจ้งขอหรือยินยอมล่วงหน้า</div>
+                        </li>
+                        <li class="flex items-start gap-2.5">
+                            <span class="text-mungoGold font-bold">4.</span>
+                            <div><strong>เก็บค่าบริการตามราคากลาง:</strong> ในการรักษาคนไข้ทุกๆ เคส เจ้าหน้าที่ต้องเก็บค่าบริการเรียกบิลตามราคากลางที่ระบุไว้อย่างครบถ้วน</div>
+                        </li>
+                        <li class="flex items-start gap-2.5">
+                            <span class="text-mungoGold font-bold">5.</span>
+                            <div><strong>การใช้ "แทรก" เข้ารักษา:</strong> สามารถร่ายคาถาใช้คำสั่งแทรกตัว (Spectate/Track) เข้ามาเพื่อช่วยเหลือระงับเหตุคนไข้ได้ แต่ต้องออกจากแทรกก่อนที่จะทำการอุ้มตัวคนไข้เคลื่อนย้าย</div>
+                        </li>
+                        <li class="flex items-start gap-2.5">
+                            <span class="text-mungoGold font-bold">6.</span>
+                            <div><strong>ห้ามใช้แทรกอุ้มผู้อื่น:</strong> ห้ามใช้คำสั่งแทรกเพื่ออุ้มตัวคนอื่นที่ไม่ใช่ผู้ที่หมดสติเด็ดขาด (ยกเว้นระบบเซิร์ฟเวอร์เกิดข้อผิดพลาด ล่องหนไม่พ้นร่าง สามารถใช้แทรกแก้อาการบัคได้)</div>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="p-6 bg-white border border-slate-200 rounded-2xl shadow-sm space-y-4">
+                    <h3 class="font-bold text-mungoDark text-md border-b border-slate-100 pb-2 flex items-center gap-2">
+                        <i class="fa-solid fa-triangle-exclamation text-rose-500"></i> ข้อระวังการเรียกเก็บเงินและการลงโทษสะสม
+                    </h3>
+                    <ul class="space-y-2.5">
+                        <li class="flex items-start gap-2.5">
+                            <span class="text-rose-500 font-bold">7.</span>
+                            <div><strong>เคสการบำบัดผู้ต้องคำสาป:</strong> ต้องปฏิบัติตามโรลเพลย์อย่างจริงจังโดยใช้ระบบคำสั่ง <em>/me /do</em> เสมอ และผู้เดียวที่มีสิทธิ์วินิจฉัยแก้ไขถอนพิษคำสาปได้สมบูรณ์คือ ผู้อำนวยการ และรองผู้อำนวยการ เท่านั้น</div>
+                        </li>
+                        <li class="flex items-start gap-2.5">
+                            <span class="text-rose-500 font-bold">8.</span>
+                            <div><strong>การเก็บเงินแบบห้ามข้อยกเว้น:</strong> การบำบัดและชุบชีวิตทุกๆ เคส ต้องคิดค่าบริการเสมอ ไม่มีข้อยกเว้นกรณีการให้รักษากระทั่งคนสนิท</div>
+                        </li>
+                        <li class="flex items-start gap-2.5">
+                            <span class="text-rose-500 font-bold">9.</span>
+                            <div><strong>กิจกรรมชิงธงมหาลัย:</strong> หน่วยงานและสตาฟเซนต์มังโกจะไม่เข้ารับทำเคสหรือช่วยเหลือคนไข้ที่กดเรียกปฐมพยาบาลในเขตชิงธงโดยเด็ดขาด</div>
+                        </li>
+                        <li class="flex items-start gap-2.5">
+                            <span class="text-rose-500 font-bold">10.</span>
+                            <div><strong>การเข้าทำเคสป่าต้องห้าม:</strong> Healer จะต้องพาผู้ช่วยร่วมทีมไปด้วยอีกอย่างน้อย 1 คน (รวมเป็นคู่ทีมงาน) ทุกครั้งเพื่อรับประกันความปลอดภัยภาคสนาม</div>
+                        </li>
+                        <li class="flex items-start gap-2.5">
+                            <span class="text-rose-500 font-bold">11.</span>
+                            <div><strong>ห้ามคิดราคาล้นบิล (โทษปรับ 10 เท่า):</strong> ห้ามใส่บิลรักษาสูงเกินราคากลางที่กำหนด หากถูกจับได้ว่าจงใจฟันเงินคนไข้ จะปรับวินัยเป็นจำนวน **10 เท่า** ของยอดบิลนั้นๆ ทันที</div>
+                        </li>
+                        <li class="flex items-start gap-2.5">
+                            <span class="text-rose-500 font-bold">12.</span>
+                            <div><strong>ห้ามใช้คาถาระงับนิ่งโดยพละการ:</strong> การร่ายคาถา <em>Immobulus</em> ใช้ได้เฉพาะกรณีสะกดคนคลั่งถูกคำสาปเท่านั้น หากฝ่าฝืนนำไปแกล้งร่ายสลบ จะโดนสอบสวนวินัยทันที</div>
+                        </li>
+                        <li class="flex items-start gap-2.5">
+                            <span class="text-rose-500 font-bold">13.</span>
+                            <div><strong>ห้ามชำระค่ารักษาสลับตัว:</strong> เจ้าหน้าที่แพทย์ต้องใส่บิลส่งบำบัดตรงต่อผู้ได้รับการรักษาโดยตรงเท่านั้น ห้ามทำระบบจ่ายเงินโอนจ่ายแทนตัวกันเด็ดขาด (ยกเว้นเคสวิชาเรียนของวิทยาลัย ซึ่งเรียกเก็บตรงกับศาสตราจารย์ผู้ว่าจ้าง)</div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== TAB 6: STORY (ROLEPLAY CONDITIONS) ==================== -->
+        <div id="tab-story" class="tab-content space-y-8">
+            <div class="border-b border-slate-200 pb-4">
+                <h2 class="text-3xl font-bold text-mungoDark flex items-center gap-3">
+                    <i class="fa-solid fa-ghost text-mungoBlue"></i> กฎและข้อพึงระวังการเล่นโรลเพลย์ (Story RP)
+                </h2>
+                <p class="text-slate-500 text-sm mt-1">ข้อพึงปฏิบัติกรณีรักษาสงครามสตอรี่ ในเขตวิทยาลัย และการพิทักษ์ร่างสลบตามกฎเกณฑ์</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- Story RP Safety -->
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                    <h3 class="font-bold text-mungoDark text-md border-b border-slate-100 pb-2 flex items-center gap-2">
+                        <i class="fa-solid fa-shield text-mungoBlue"></i> การระวังภัยก่อนการรักษาในพื้นที่สตอรี่
+                    </h3>
+                    <p class="text-xs text-slate-600 leading-relaxed">
+                        1. **ประเมินความปลอดภัย:** หากเป็นพื้นที่สุ่มเสี่ยงที่มีการต่อสู้ ให้ Healers ถอนตัวออกมาสังเกตการณ์ที่ด้านนอกก่อน รอจนสถานการณ์ควบคุมได้ปลอดภัยจึงดำเนินการเข้าไปรักษาพยาบาล เพื่อเลี่ยงแรงกระแทกจากโรลพิเศษ<br><br>
+                        2. **เปิดสัญญาณจุดปลอดภัย (Lumos Maxima):** แพทย์จะยืนประจำจุดสังเกตการณ์ปลอดภัย โดยเปิดคาถา <em>Lumos Maxima</em> ค้างไว้เพื่อเป็นเครื่องบอกพิกัดจุดบำบัดหลักในแนวขัดแย้ง<br><br>
+                        3. **การรักษาตัวในป่าอันตราย:** พื้นที่ป่าต้องห้ามและป่าสายเลือด โรลพิเศษทำร้ายแพทย์ได้ตลอดเวลา ให้เคลื่อนย้ายคนไข้ไปยังพิกัดจุดอับสายตาหรือฐานแพทย์โดยเร็วก่อนร่ายคาถาชุบฟื้นฟู
+                    </p>
+                </div>
+
+                <!-- Spell restraint & Moving fine -->
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                    <h3 class="font-bold text-mungoDark text-md border-b border-slate-100 pb-2 flex items-center gap-2">
+                        <i class="fa-solid fa-triangle-exclamation text-rose-500"></i> ข้อระวังการเคลื่อนย้าย และห้องบาเรียถาวรในปราสาท
+                    </h3>
+                    <p class="text-xs text-slate-600 leading-relaxed">
+                        1. **การชุบชีวิตระหว่างสตอรี่:** การดำเนินการชุบชีวิตผู้สลบระหว่างดำเนินเรื่อง ให้ขึ้นอยู่กับการตัดสินใจและดุลพินิจสูงสุดของแพทย์สตาฟเซนต์มังโกในสถานการณ์นั้นๆ<br><br>
+                        2. **สลบบริเวณวิทยาลัย:** หากคนไข้ล้มสลบภายในเขตมหาวิทยาลัย ให้เคลื่อนย้ายคนไข้พาส่งห้องบำบัดรักษาชั้นล่างในปราสาท (ซึ่งเป็นห้องบาเรียถาวรเพื่อความปลอดภัยสูงสุด) ทันทีเพื่อเริ่มต้นทำเคส และส่งมอบบิลเรียกเก็บค่าบริการแก่คนไข้ทุกกรณี<br><br>
+                        3. **โทษปรับการย้ายเคสคนไข้:** หากคนไข้ส่งระบบแจ้งเรียกเคสพยาบาลเข้ามาแล้ว และมีบุคคลภายนอกที่ไม่ใช่หน่วยแพทย์ทำการเคลื่อนย้ายร่างคนไข้หลบหนีออกจากพื้นที่เดิมโดยพละการ ทางเซนต์มังโกจะปรับค่ารักษาเพิ่มขึ้นเป็น **2 เท่า** ทันที เรียกเก็บกับผู้แจ้งเรื่องเคสแรกเริ่ม
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== TAB 7: RATES (FEES & CONTRACTS) ==================== -->
+        <div id="tab-rates" class="tab-content space-y-8">
+            <div class="border-b border-slate-200 pb-4">
+                <h2 class="text-3xl font-bold text-mungoDark flex items-center gap-3">
+                    <i class="fa-solid fa-coins text-mungoBlue"></i> อัตราค่าบริการและข้อผูกมัดสัญญาว่าจ้าง
+                </h2>
+                <p class="text-slate-500 text-sm mt-1">ราคากลางคาถาพยาบาลเวชปฏิบัติ และสัญญาจัดจ้างหลักสูตรมหาวิทยาลัยอย่างเป็นทางการ</p>
+            </div>
+
+            <!-- Spell Costs Tables -->
+            <div class="bg-white border border-slate-200 shadow-sm rounded-2xl overflow-hidden mb-8">
+                <div class="px-6 py-4 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
+                    <h3 class="font-bold text-mungoDark text-md">ราคากลางค่ารักษาพยาบาล (Standard Magical Fees)</h3>
+                    <span class="text-xs text-mungoBlue font-bold bg-blue-50 px-2 py-1 rounded">อัปเกรดระบบจัดเก็บ</span>
+                </div>
+                
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm">
+                        <thead class="bg-mungoDark text-white font-serif">
+                            <tr>
+                                <th class="p-4">คาถา / รูปแบบการพยาบาลรักษา</th>
+                                <th class="p-4">ค่าบริการเวชภัณฑ์ (Sickle)</th>
+                                <th class="p-4">ขอบเขตเงื่อนไขบริการเพิ่มเติม</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100">
+                            <tr class="hover:bg-slate-50 transition-colors">
+                                <td class="p-4 font-bold text-mungoDark">การใช้เวทมนตร์ Episky</td>
+                                <td class="p-4"><span class="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded text-xs font-bold">300 SK</span></td>
+                                <td class="p-4 text-xs text-slate-500">สำหรับฟื้นฟูบาดแผลขั้นพื้นฐาน (เติมเกจพลังชีวิตให้เต็มหลอดทันที)</td>
+                            </tr>
+                            <tr class="hover:bg-slate-50 transition-colors">
+                                <td class="p-4 font-bold text-mungoDark">การใช้เวทมนตร์ Therapy</td>
+                                <td class="p-4"><span class="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded text-xs font-bold">1,000 SK</span></td>
+                                <td class="p-4 text-xs text-slate-500">บำบัดเวทมนตร์เยียวยาฟื้นคืนชีพขั้นกลาง</td>
+                            </tr>
+                            <tr class="hover:bg-slate-50 transition-colors">
+                                <td class="p-4 font-bold text-mungoDark">การใช้หินชุบชีวิต (พื้นที่ปกติ)</td>
+                                <td class="p-4"><span class="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded text-xs font-bold">1,300 SK</span></td>
+                                <td class="p-4 text-xs text-slate-500">การคืนวิญญาณผู้สลบในจุดเมืองหลวงหรือมหาลัยทั่วไป</td>
+                            </tr>
+                            <tr class="hover:bg-slate-50 transition-colors">
+                                <td class="p-4 font-bold text-mungoDark">การใช้หินชุบชีวิต (ป่าสายเลือด / ป่าต้องห้าม / จุดสุ่มเสี่ยง)</td>
+                                <td class="p-4"><span class="bg-amber-100 text-amber-800 px-2 py-0.5 rounded text-xs font-bold">1,700 - 2,000 SK</span></td>
+                                <td class="p-4 text-xs text-slate-500">อัตราตามระดับความเสี่ยงในการฝ่าสัตว์วิเศษหรือแนวปะทะเดือด</td>
+                            </tr>
+                            <tr class="hover:bg-slate-50 transition-colors">
+                                <td class="p-4 font-bold text-mungoDark">การว่าจ้างแพทย์บำบัดพิเศษรายชั่วโมง</td>
+                                <td class="p-4"><span class="bg-blue-100 text-blue-800 px-2 py-0.5 rounded text-xs font-bold">20,000 SK / ชม.</span></td>
+                                <td class="p-4 text-xs text-slate-500">หากจ้างไม่เต็มชั่วโมงคิดราคาเต็ม 1 ชม. และบวกค่าหินชุบเสริม 1,000 SK ต่อเคสรักษา</td>
+                            </tr>
+                            <tr class="hover:bg-slate-50 transition-colors">
+                                <td class="p-4 font-bold text-mungoDark">การเคลื่อนย้ายสลบหลังส่งแจ้งเคสพยาบาล</td>
+                                <td class="p-4 text-rose-600 font-bold">ปรับ 2 เท่า ของราคารักษา</td>
+                                <td class="p-4 text-xs text-slate-500">คิดทวีคูณเรียกเก็บกับตัวผู้ส่งแจ้งรหัสพยาบาลล่วงหน้าเดิม</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Hiring Regulations Cards -->
+            <div>
+                <h3 class="text-lg font-bold text-mungoDark mb-4 flex items-center gap-2">
+                    <i class="fa-solid fa-file-contract text-mungoGold"></i> กฎการว่าจ้างและสัญญาจัดจ้างทางการศึกษา
+                </h3>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs text-slate-600 leading-relaxed">
+                    <div class="p-5 bg-white border border-slate-200 rounded-xl space-y-2.5">
+                        <h4 class="font-bold text-sm text-mungoDark">1. ระเบียบลงทะเบียนว่าจ้างทั่วไป</h4>
+                        <p><strong>ขั้นตอนการลงจ้าง:</strong> หากต้องการว่าจ้างให้ลงรายละเอียดในนิตยสารมหาวิทยาลัยในหมวดหมู่ของ Saint Mungo และแจ้งจุดประสงค์ตามแบบฟอร์มให้ครบถ้วนทุกครั้ง</p>
+                        <p><strong>การรับงานนอก:</strong> ห้ามแพทย์รับงานนอกสถานที่โดยไม่มีการลงประวัติล่วงหน้าเด็ดขาด (ยกเว้นนักศึกษาที่สลบและศาสตราจารย์ฝ่ายปกครองแจ้งร้องเรียกในหินสื่อสารเข้าห้องคุมประพฤติเพื่อตรวจสอบ)</p>
+                        <p><strong>ข้อจำกัดวันจันทร์สีเลือด (Blood Moon):</strong> วันจันทร์สีเลือดจ้างบำบัดได้จำกัดเพียง **1 คนต่อ 1 บทบาทโรล** พร้อมแจงพิกัดสแตนด์บายของแพทย์ให้ชัดเจนล่วงหน้า</p>
+                    </div>
+
+                    <div class="p-5 bg-white border border-slate-200 rounded-xl space-y-2.5">
+                        <h4 class="font-bold text-sm text-mungoDark">2. ระเบียบประสานงานและกฎการฉีกสัญญา</h4>
+                        <p><strong>การทำสัญญาร่วมลดค่ารักษา:</strong> หากรายวิชาเรียนใดมาประสานต่อรองขอลดค่าบริการ และทำข้อตกลงร่วมกันเรียบร้อยแล้ว ทุกๆ คาบเรียนที่เปิดสอนวิชาดังกล่าวหลังจากนั้นจะต้องทำการจ้างสตาฟเซนต์มังโกไปอำนวยความสะดวกเสมอ</p>
+                        <p><strong>บทลงโทษการผิดสัญญารายวิชา:</strong> หากพบว่าเปิดสอนโดยไม่แจ้งประสานจ้างงานสตาฟเข้ามา ทางหน่วยงานเซนต์มังโกจะดำเนินการ **ฉีกข้อตกลงและยกเลิกสิทธิพิเศษทิ้งทันที** พร้อมขึ้นบัญชีแบล็คลิสต์ห้ามทำข้อตกลงสัญญาการศึกษากับรายวิชาดังกล่าวอีกตลอดไป</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- ==================== GOOGLE SITES SYSTEM FOOTER ==================== -->
+    <footer class="bg-mungoDark text-white border-t-2 border-mungoGold mt-12 py-10 px-4">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
+            
+            <div class="flex items-center gap-3">
+                <div class="w-12 h-12 rounded-full border border-mungoGold bg-white overflow-hidden p-0.5">
+                    <img src="image_9c2e9f.jpg" alt="Saint Logo" class="w-full h-full object-cover rounded-full" onerror="this.src='https://placehold.co/100x100/ffffff/061224?text=St.Mungo'">
+                </div>
+                <div>
+                    <h5 class="font-serif font-bold text-mungoGold tracking-wider text-sm">SAINT MUNGO'S HOSPITAL</h5>
+                    <p class="text-[10px] text-slate-400">เซนต์มังโกเพื่อผู้ป่วยและผู้บาดเจ็บทางเวทมนตร์แห่งวิทยาลัยอาคาเดีย</p>
+                </div>
+            </div>
+
+            <div class="text-center md:text-right text-[11px] text-slate-400 leading-relaxed">
+                <p>ช่องวิทยุหินสื่อสารปฏิบัติหน้าที่อย่างเป็นทางการหลัก: <strong class="text-mungoGold">ช่อง 950</strong></p>
+                <p>© 2026 Saint Mungo's Portal. พัฒนาเนื้อหาและโครงสร้างโดยทีมงานเวชสถิติเซนต์มังโก</p>
+            </div>
+
+        </div>
+    </footer>
+
+    <!-- ==================== INTERACTIVE DATA SCRIPTS (GOOGLE SITE BEHAVIOR) ==================== -->
+    <script>
+        // Database of all rules for the real-time search engine
+        const rulesDatabase = [
+            { id: 'duty-healer-1', title: 'การเข้าเวรประจำจุด Healer', desc: 'ต้องอยู่ในบริเวณสถานที่ที่กำหนดไว้ เช่น จัตุรัสกลาง หรือโซนบำบัดพื้นที่สตอรี่', category: 'การเข้าเวร', tab: 'duty' },
+            { id: 'duty-healer-2', title: 'ระเบียบชุดเครื่องแบบ Healer', desc: 'ต้องแต่งกายในชุดเครื่องแบบของหน่วยงานที่ได้สิทธิ์แลกจากเหรียญตราเซนต์มังโกเท่านั้น', category: 'การเข้าเวร', tab: 'duty' },
+            { id: 'duty-healer-3', title: 'ระบบวิทยุช่อง 950 Healer', desc: 'ต้องสแตนด์บายหินสื่อสารช่อง 950 ฝ่าฝืนไม่เชื่อมต่อปรับ 30,000 SK', category: 'การเข้าเวร', tab: 'duty' },
+            { id: 'duty-healer-4', title: 'ข้อห้าม AFK เกิน 15 นาที', desc: 'ห้ามพนักงานพ้นหน้าจอเกิน 15 นาที และต้องส่งเสียงวิทยุแจ้งเพื่อนร่วมเวรทุกครั้งก่อนพัก', category: 'การเข้าเวร', tab: 'duty' },
+            { id: 'duty-healer-5', title: 'ห้ามฟาร์มมอนสเตอร์เด็ดขาด', desc: 'ไม่อนุญาตให้แพทย์ Healer/Intern ล่ามอนสเตอร์หรือฟาร์มเก็บสมุนไพรในชุดปฏิบัติหน้าที่หรือเวลาเวร', category: 'การเข้าเวร', tab: 'duty' },
+            { id: 'duty-intern-1', title: 'ระเบียบสะสมชั่วโมงของเด็กฝึกงาน', desc: 'Interns ต้องแสตนด์บาย 3 ชม./วัน หรือ 40 ชม./ปี และสะสมสถิติชุบชีวิตอย่างน้อย 60 เคสเพื่อจบหลักสูตร', category: 'การเข้าเวร', tab: 'duty' },
+            { id: 'duty-intern-2', title: 'หินสื่อสารช่อง 950 Intern', desc: 'เด็กฝึกงานไม่ยอมเข้าช่องสื่อสาร 950 ขณะลงเวร จะถูกลงโทษสั่งปรับ 10,000 SK', category: 'การเข้าเวร', tab: 'duty' },
+            { id: 'grounds-1', title: 'ข้อห้ามใช้เสียงรบกวนในโรงพยาบาล', desc: 'หลีกเลี่ยงการก่อความไม่สงบ เปิดไมค์เสียงดังรบกวนคนไข้และแพทย์คนอื่นในพื้นที่เซนต์มังโก', category: 'กฎพื้นที่', tab: 'grounds' },
+            { id: 'grounds-2', title: 'กฎห้ามปกปิดใบหน้าสวมหน้ากาก', desc: 'ห้ามผู้สวมหน้ากากสัญจรในจัตุรัสเซนต์มังโก และคนไข้ต้องปลดหน้ากากก่อนรับการรักษาทุกกรณี', category: 'กฎพื้นที่', tab: 'grounds' },
+            { id: 'grounds-3', title: 'กฎห้ามพกไม้กายสิทธิ์ & ห้ามร่ายเวทย์', desc: 'เมื่อเข้าเขตทำงานต้องเก็บไม้กายสิทธิ์ทันที ครั้ง 1 เตือนหัก 10 แต้ม | ครั้ง 2 ปรับ 100k SK หัก 20 แต้ม | ครั้ง 3 ปรับ 100k SK หัก 30 แต้ม | ครั้งต่อไป หักเพิ่มขึ้น +10 แต้มและคงค่าปรับ', category: 'กฎพื้นที่', tab: 'grounds' },
+            { id: 'grounds-4', title: 'กฎห้ามขี่ไม้กวาด/ยานพาหนะเข้าพื้นที่', desc: 'ห้ามขับขี่เข้ามาเด็ดขาด หากเป็นนักเรียนหัก 10 แต้มปรับ 50,000 SK | หากเป็นพลเมือง/โรลพิเศษ ปรับ 100,000 SK ทันทีไม่มีตักเตือน', category: 'กฎพื้นที่', tab: 'grounds' },
+            { id: 'safety-1', title: 'การคุ้มครองแพทย์ Healer Protection', desc: 'ห้ามผู้ใดทำร้ายผู้บำบัดรักษาในเครื่องแบบ ฝ่าฝืนโดนสะกดนิ่ง Immobulus และปรับ 100,000 SK หรือติดแบล็คลิสต์ประวัติ', category: 'ความปลอดภัย', tab: 'safety' },
+            { id: 'safety-2', title: 'ข้อห้ามประพฤติทะเลาะวิวาทของแพทย์', desc: 'แพทย์ห้ามวิวาทเด็ดขาด ฝ่าฝืนครั้งแรกเตือนปรับ 200,000 SK และคาดโทษ | ผิดซ้ำไล่ออกยึดคาถารักษาและปรับ 500,000 SK', category: 'ความปลอดภัย', tab: 'safety' },
+            { id: 'treatment-1', title: 'จรรยาบรรณพยาบาล ไม่เลือกปฏิบัติ', desc: 'แพทย์ต้องยินดีรักษาผู้มาติดต่อใช้บริการทุกคนอย่างสุภาพและเท่าเทียมในสภาพโรลสวมใส่ปกติ', category: 'กฎการรักษา', tab: 'treatment' },
+            { id: 'treatment-2', title: 'การห้ามรักษาในจุดฟาร์มมอนสเตอร์', desc: 'ไม่อนุญาตให้ทำการร่ายเวทบำบัดช่วยเหลือผู้เล่นคนใดในพิกัดวงฟาร์มมอนสเตอร์ในทุกกรณี', category: 'กฎการรักษา', tab: 'treatment' },
+            { id: 'treatment-3', title: 'สิทธิการใช้ แทรก (Spectate)', desc: 'อนุญาตให้ส่งคำสั่งแทรกตัวเข้ารักษาจุดอันตรายได้ แต่ต้องยกเลิกออกจากแทรกก่อนอุ้มคนไข้ส่งฐาน', category: 'กฎการรักษา', tab: 'treatment' },
+            { id: 'treatment-4', title: 'ห้ามใช้แทรกอุ้มคนทั่วไป', desc: 'ห้ามใช้แทรกอุ้มคนที่ไม่หมดสติ ยกเว้นแก้บัคล่องหนทางเซิร์ฟเวอร์', category: 'กฎการรักษา', tab: 'treatment' },
+            { id: 'treatment-5', title: 'ห้ามเรียกบิลเกินราคาจริง (ปรับ 10 เท่า)', desc: 'ห้ามเด็ดขาดในการออกบิลรักษาราคาแพงกว่าตารางกำหนด หากตรวจพบสืบสวนจริงจะปรับถึง 10 เท่าของมูลค่าบิล', category: 'กฎการรักษา', tab: 'treatment' },
+            { id: 'treatment-6', title: 'กฎห้ามจ่ายเงินแทนคนไข้', desc: 'แพทย์ต้องใส่บิลและเก็บเงินตรงตัวกับผู้ได้รับการบำบัด ห้ามคนนอกจ่ายแทนกันเด็ดขาด (เว้นแต่เคสคาบเรียนศาสตราจารย์ว่าจ้าง)', category: 'กฎการรักษา', tab: 'treatment' },
+            { id: 'rates-1', title: 'อัตราค่ารักษาระบบปกติ', desc: 'คาถา Episky ราคา 300 SK | คาถา Therapy ราคา 1,000 SK | ใช้หินชุบชีวิตจุดปลอดภัยราคา 1,300 SK', category: 'ค่ารักษา', tab: 'rates' },
+            { id: 'rates-2', title: 'อัตราค่ารักษานอกสถานที่เสี่ยงภัย', desc: 'ทำเคสชุบชีวิตพิกัดเสี่ยงภัย ป่าสายเลือด ป่าต้องห้าม อัตราเก็บอยู่ที่ 1,700 - 2,000 SK', category: 'ค่ารักษา', tab: 'rates' },
+            { id: 'rates-3', title: 'ระเบียบว่าจ้างรายชั่วโมงพิเศษ', desc: 'จ้างเหมาทีมแพทย์พยาบาลชั่วโมงละ 20,000 SK เศษชั่วโมงปัดขึ้นเต็มเวลา และเก็บค่าธรรมเนียมหินชุบเสริม 1,000 SK ต่อเคส', category: 'ค่ารักษา', tab: 'rates' },
+            { id: 'rates-4', title: 'กฎการฉีกสัญญาความร่วมมือของวิชาศึกษา', desc: 'หากทำสัญญาลดหย่อนค่ารักษาแล้วเปิดวิชาสอนโดยไม่ทำเรื่องจ้างงานทีมแพทย์ สัญญาจะถูกฉีกยกเลิกทันทีพร้อมแบล็คลิสต์รายวิชาดังกล่าว', category: 'ค่ารักษา', tab: 'rates' }
+        ];
+
+        // 1. Google Sites Tab Switching mechanism
+        function switchTab(tabId) {
+            const contents = document.querySelectorAll('.tab-content');
+            contents.forEach(content => content.classList.remove('active'));
+
+            const activeTab = document.getElementById('tab-' + tabId);
+            if (activeTab) {
+                activeTab.classList.add('active');
+            }
+
+            const buttons = document.querySelectorAll('.nav-tab');
+            buttons.forEach(button => {
+                button.classList.remove('text-mungoBlue', 'bg-slate-100');
+                button.classList.add('text-slate-600', 'hover:text-mungoBlue', 'hover:bg-slate-50');
+            });
+
+            const activeBtn = document.getElementById('tab-' + tabId + '-btn');
+            if (activeBtn) {
+                activeBtn.classList.remove('text-slate-600', 'hover:text-mungoBlue', 'hover:bg-slate-50');
+                activeBtn.classList.add('text-mungoBlue', 'bg-slate-100');
+            }
+
+            // Scroll to navigation area gently
+            window.scrollTo({ top: 320, behavior: 'smooth' });
+            document.getElementById('mobile-menu').classList.add('hidden');
+        }
+
+        // Mobile Nav toggler
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobile-menu');
+            menu.classList.toggle('hidden');
+        }
+
+        // 2. Interactive Share Calculator
+        function calculateShare() {
+            const input = document.getElementById('calc-input').value;
+            const totalWage = parseFloat(input);
+            
+            if (isNaN(totalWage) || totalWage < 0) {
+                document.getElementById('healer-share-result').textContent = '0 SK';
+                document.getElementById('intern-share-result').textContent = '0 SK';
+                return;
+            }
+
+            const split = totalWage / 2;
+            const formatter = new Intl.NumberFormat('th-TH');
+            
+            document.getElementById('healer-share-result').textContent = formatter.format(split) + ' SK';
+            document.getElementById('intern-share-result').textContent = formatter.format(split) + ' SK';
+        }
+
+        // 3. Interactive Punishment Fine Lookup
+        function lookupFine() {
+            const selectedType = document.getElementById('fine-type').value;
+            let sickleText = '';
+            let pointsText = '';
+            let actionText = '';
+
+            switch(selectedType) {
+                case 'broom-student':
+                    sickleText = '50,000 Sickle';
+                    pointsText = 'หักคะแนนบ้านนักศึกษา 10 คะแนน';
+                    actionText = '*เรียกตามศาสตราจารย์หัวหน้าบ้านมาพิจารณาลงโทษวินัยเพิ่มเติมโดยไม่มีตักเตือน';
+                    break;
+                case 'broom-citizen':
+                    sickleText = '100,000 Sickle';
+                    pointsText = 'ไม่มีการหักคะแนนบ้าน';
+                    actionText = '*ปรับเต็มฐานพลเมืองหรือโรลพิเศษต่างๆ ทุกกรณีโดยไม่มีข้อยกเว้นหรือตักเตือน';
+                    break;
+                case 'wand-first':
+                    sickleText = 'ไม่มีการปรับเงิน (ขั้นตักเตือน)';
+                    pointsText = 'หักคะแนนบ้าน 10 คะแนน';
+                    actionText = '*ตักเตือนเจ้าของไม้กายสิทธิ์ และจดชื่อรายงานคณะวิทยาลัยทันที';
+                    break;
+                case 'wand-second':
+                    sickleText = '100,000 Sickle';
+                    pointsText = 'หักคะแนนบ้าน 20 คะแนน';
+                    actionText = '*ส่งบันทึกชื่อต่อมหาลัย และลงโทษเก็บค่าปรับทางการเงินเต็มพิกัด';
+                    break;
+                case 'wand-third':
+                    sickleText = '100,000 Sickle';
+                    pointsText = 'หักคะแนนบ้าน 30 คะแนน';
+                    actionText = '*หักคะแนนบ้านเพิ่มร่วมปรับเงินสูงสุดสะสมสะกดไม้ครั้งที่สาม';
+                    break;
+                case 'wand-multi':
+                    sickleText = '100,000 Sickle';
+                    pointsText = 'บวกหักคะแนนเพิ่มขึ้น +10 คะแนนต่อการร่ายในครั้งถัดไป';
+                    actionText = '*ประมวลโทษแบบอัตราก้าวหน้า และส่งเรื่องเพื่อเรียกพิจารณาถอดถอนออกจากมหาลัย';
+                    break;
+            }
+
+            document.getElementById('fine-sickle-val').textContent = sickleText;
+            document.getElementById('fine-points-val').textContent = pointsText;
+            document.getElementById('fine-action-val').textContent = actionText;
+        }
+
+        // 4. Client-side Realtime Rule Engine (Smart search)
+        function performSearch() {
+            const query = document.getElementById('global-search').value.trim().toLowerCase();
+            const resultsSection = document.getElementById('search-results-section');
+            const resultsContainer = document.getElementById('search-results-container');
+            const queryText = document.getElementById('search-query-text');
+
+            if (!query) {
+                resultsSection.classList.add('hidden');
+                return;
+            }
+
+            resultsSection.classList.remove('hidden');
+            queryText.textContent = query;
+            resultsContainer.innerHTML = '';
+
+            const matched = rulesDatabase.filter(r => 
+                r.title.toLowerCase().includes(query) || 
+                r.desc.toLowerCase().includes(query) || 
+                r.category.toLowerCase().includes(query)
+            );
+
+            if (matched.length === 0) {
+                resultsContainer.innerHTML = `
+                    <div class="col-span-full text-center py-6 text-slate-500 text-xs">
+                        <i class="fa-solid fa-face-frown text-xl block mb-2 text-slate-400"></i>
+                        ไม่พบข้อมูลกฎระเบียบที่สอดคล้องกับหัวข้อค้นหาของคุณ ลองกรอกหัวข้ออื่น เช่น "แทรก" "บิล" "ป่าสายเลือด"
+                    </div>
+                `;
+                return;
+            }
+
+            matched.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'p-4 bg-white border border-amber-200 rounded-xl shadow-sm hover:border-mungoBlue transition-colors cursor-pointer';
+                card.onclick = () => {
+                    switchTab(item.tab);
+                    clearSearch();
+                };
+                card.innerHTML = `
+                    <div class="flex justify-between items-start mb-2">
+                        <span class="bg-amber-100 text-amber-800 text-[10px] font-bold px-2 py-0.5 rounded-full">${item.category}</span>
+                        <span class="text-[10px] text-mungoBlue font-bold hover:underline">ไปยังหน้าหลัก <i class="fa-solid fa-arrow-right-long"></i></span>
+                    </div>
+                    <h4 class="font-bold text-mungoDark text-sm mb-1">${item.title}</h4>
+                    <p class="text-xs text-slate-600 leading-relaxed">${item.desc}</p>
+                `;
+                resultsContainer.appendChild(card);
+            });
+        }
+
+        function clearSearch() {
+            document.getElementById('global-search').value = '';
+            document.getElementById('search-results-section').classList.add('hidden');
+        }
+
+        function showToast(message, type = "success") {
+            const toast = document.getElementById('toast-notification');
+            const toastMsg = document.getElementById('toast-message');
+            const toastIcon = document.getElementById('toast-icon');
+
+            toastMsg.innerText = message;
+
+            if (type === "success") {
+                toastIcon.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-500 text-lg"></i>`;
+            } else if (type === "warning") {
+                toastIcon.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-amber-500 text-lg"></i>`;
+            } else {
+                toastIcon.innerHTML = `<i class="fa-solid fa-circle-xmark text-rose-500 text-lg"></i>`;
+            }
+
+            toast.classList.remove('translate-y-20', 'opacity-0', 'pointer-events-none');
+            
+            setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0', 'pointer-events-none');
+            }, 3500);
+        }
+
+        // Initialize values on window load
+        window.onload = function() {
+            calculateShare();
+            lookupFine();
+        };
+    </script>
+
+</body>
+</html>
